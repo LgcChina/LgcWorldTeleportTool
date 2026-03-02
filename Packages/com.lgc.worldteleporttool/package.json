@@ -1,0 +1,15 @@
+{
+  "name": "com.lgc.worldteleporttool",
+  "version": "1.0.0",
+  "displayName": "LGC 传送工具",
+  "description": "快速创建、编辑、删除场景内的简单传送点",
+  "unity": "2022.3",
+  "keywords": ["Unity", "Editor", "Tool", "Teleport", "传送体", "场景编辑", "Undo", "VRChat"],
+  "author": {
+    "name": "LgcChina",
+    "url": "https://github.com/LgcChina"
+  },
+  "vpmDependencies": {
+    "com.vrchat.worlds": "3.x.x"
+  }
+}
