@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ namespace Lgc.TeleportTool
     /// <summary>
     /// 功能：快速创建/编辑/删除场景内的传送体，支持二次确认删除+Undo撤回
     /// 新增：实时控制当前按钮的网格显示，隐藏时直接移除MeshFilter和MeshRenderer，显示时自动添加
+    /// 新增：新建传送体默认放置在当前场景视图中心前方5米处，避免从原点创建的不便
     /// </summary>
     public class LgcWorldTeleportTool : EditorWindow
     {
@@ -299,8 +300,24 @@ namespace Lgc.TeleportTool
         #endregion
 
         #region 核心逻辑
+        /// <summary>
+        /// 获取当前场景视图中心前方一定距离的位置
+        /// </summary>
+        private Vector3 GetSceneViewCenterPosition(float distance = 1f)
+        {
+            SceneView sceneView = SceneView.lastActiveSceneView;
+            if (sceneView != null && sceneView.camera != null)
+            {
+                Camera cam = sceneView.camera;
+                return cam.transform.position + cam.transform.forward * distance;
+            }
+            return Vector3.zero; // 回退到原点
+        }
+
         private void CreateNewTeleport()
         {
+            Vector3 spawnPos = GetSceneViewCenterPosition();
+
             currentRoot = new GameObject($"{teleportBaseName}({teleportCounter})");
             Undo.RegisterCreatedObjectUndo(currentRoot, $"Create Teleport Group: {currentRoot.name}");
 
@@ -308,13 +325,14 @@ namespace Lgc.TeleportTool
             Undo.RegisterCreatedObjectUndo(currentBtn, $"Create Teleport Button: {currentBtn.name}");
             currentBtn.name = "传送按钮";
             currentBtn.transform.SetParent(currentRoot.transform);
+            currentBtn.transform.position = spawnPos;
             currentBtn.transform.localScale = Vector3.one * 0.1f;
             currentBtn.GetComponent<BoxCollider>().isTrigger = true;
 
             currentTarget = new GameObject("传送目标");
             Undo.RegisterCreatedObjectUndo(currentTarget, $"Create Teleport Target: {currentTarget.name}");
             currentTarget.transform.SetParent(currentRoot.transform);
-            currentTarget.transform.position = currentBtn.transform.position + new Vector3(0, 0, 2);
+            currentTarget.transform.position = spawnPos + new Vector3(0, 0, 2);
 
             currentMode = ToolMode.Creating;
             currentAdjust = AdjustPart.Button;
